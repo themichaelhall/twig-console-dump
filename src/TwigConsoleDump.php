@@ -9,7 +9,7 @@ declare(strict_types=1);
 namespace MichaelHall\TwigConsoleDump;
 
 use Twig\Extension\AbstractExtension;
-use Twig\TwigFilter;
+use Twig\TwigFunction;
 
 /**
  * Twig console dump extension.
@@ -25,17 +25,17 @@ class TwigConsoleDump extends AbstractExtension
      *
      * @since 1.0.0
      *
-     * @return TwigFilter[] The filters.
+     * @return TwigFunction[] The filters.
      */
-    public function getFilters(): array
+    public function getFunctions(): array
     {
         return [
-            new TwigFilter('dump', [$this, 'dumpFilter'], ['is_safe' => ['html']]),
+            new TwigFunction('dump', [$this, 'dumpFunction'], ['is_safe' => ['html']]),
         ];
     }
 
     /**
-     * The dump filter.
+     * The dump function.
      *
      * @since 1.0.0
      *
@@ -43,7 +43,7 @@ class TwigConsoleDump extends AbstractExtension
      *
      * @return string The result as a script printing to console.
      */
-    public function dumpFilter($var): string
+    public function dumpFunction($var): string
     {
         return '<script>console.log(\'' . htmlentities(print_r($var, true)) . '\');</script>';
     }

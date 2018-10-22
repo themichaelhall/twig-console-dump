@@ -52,7 +52,7 @@ class TwigConsoleDumpTest extends TestCase
     public function setUp()
     {
         $arrayLoader = new ArrayLoader([
-            'test.twig' => '{{ var | dump }}',
+            'test.twig' => '{{ dump(var) }}',
         ]);
         $this->twigEnvironment = new Environment($arrayLoader);
         $this->twigEnvironment->addExtension(new TwigConsoleDump());
