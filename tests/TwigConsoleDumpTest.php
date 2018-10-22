@@ -15,13 +15,35 @@ use Twig\Loader\ArrayLoader;
 class TwigConsoleDumpTest extends TestCase
 {
     /**
-     * Test dump extension.
+     * Test dump extension for scalars (and null).
+     *
+     * @dataProvider scalarsDataProvider
+     *
+     * @param mixed  $var            The variable to debug.
+     * @param string $expectedResult The expected result.
      */
-    public function testDump()
+    public function testScalars($var, string $expectedResult)
     {
-        $result = $this->twigEnvironment->render('test.twig', ['var' => 'Foo']);
+        $result = $this->twigEnvironment->render('test.twig', ['var' => $var]);
 
-        self::assertSame('<script>console.log(\'Foo\');</script>', $result);
+        self::assertSame($expectedResult, $result);
+    }
+
+    /**
+     * Data provider for testScalars.
+     *
+     * @return array
+     */
+    public function scalarsDataProvider()
+    {
+        return [
+            [null, '<script>console.log(\'\');</script>'],
+            [false, '<script>console.log(\'\');</script>'],
+            [true, '<script>console.log(\'1\');</script>'],
+            [100, '<script>console.log(\'100\');</script>'],
+            [-0.5, '<script>console.log(\'-0.5\');</script>'],
+            ['Foo Bar Baz', '<script>console.log(\'Foo Bar Baz\');</script>'],
+        ];
     }
 
     /**
