@@ -40,8 +40,8 @@ class TwigConsoleDumpTest extends TestCase
             [null, '<script>console.log(\'%cnull\',\'color:#555;font-weight:400\');</script>'],
             [false, '<script>console.log(\'%cfalse %cbool\',\'color:#608;font-weight:600;\',\'color:#555;font-weight:400\');</script>'],
             [true, '<script>console.log(\'%ctrue %cbool\',\'color:#608;font-weight:600;\',\'color:#555;font-weight:400\');</script>'],
-            [100, '<script>console.log(\'100\');</script>'],
-            [-0.5, '<script>console.log(\'-0.5\');</script>'],
+            [100, '<script>console.log(\'%c100 %cint\',\'color:#608;font-weight:600;\',\'color:#555;font-weight:400\');</script>'],
+            [-0.5, '<script>console.log(\'%c-0.5 %cfloat\',\'color:#608;font-weight:600;\',\'color:#555;font-weight:400\');</script>'],
             ['Foo Bar Baz', '<script>console.log(\'Foo Bar Baz\');</script>'],
         ];
     }
