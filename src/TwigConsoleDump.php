@@ -79,6 +79,10 @@ class TwigConsoleDump extends AbstractExtension
             return 'console.log(\'%c' . $var . ' %cfloat\',\'color:#608;font-weight:600;\',\'color:#555;font-weight:400\');';
         }
 
+        if (is_string($var)) {
+            return 'console.log(\'%c"' . self::escapeString($var) . '" %cstring[' . strlen($var) . ']\',\'color:#063;font-weight:600;\',\'color:#555;font-weight:400\');';
+        }
+
         return 'console.log(\'' . self::escapeString(print_r($var, true)) . '\');';
     }
 
