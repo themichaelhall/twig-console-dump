@@ -51,6 +51,22 @@ class TwigConsoleDump extends AbstractExtension
             return '';
         }
 
-        return '<script>console.log(\'' . htmlentities(print_r($var, true)) . '\');</script>';
+        return '<script>console.log(\'' . self::escapeString(print_r($var, true)) . '\');</script>';
+    }
+
+    /**
+     * Escapes a string for console logging.
+     *
+     * @param string $s The original string.
+     *
+     * @return string The escaped string.
+     */
+    private static function escapeString(string $s): string
+    {
+        return str_replace(
+            ['\\', '<', '>', '\'', "\n", "\r", '%'],
+            ['\\\\', '\\<', '\\>', '\\\'', '\\n', '\\r', '\\%'],
+            $s
+        );
     }
 }

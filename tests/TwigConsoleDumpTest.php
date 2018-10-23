@@ -58,6 +58,16 @@ class TwigConsoleDumpTest extends TestCase
     }
 
     /**
+     * Test logging with escaped characters.
+     */
+    public function testEscapedCharacters()
+    {
+        $result = $this->twigEnvironment->render('test.twig', ['var' => '<p> \'Foo\' "Bar" \\ New' . "\r\n" . 'Line %c']);
+
+        self::assertSame('<script>console.log(\'\\<p\\> \\\'Foo\\\' "Bar" \\\\ New\\r\\nLine \\%c\');</script>', $result);
+    }
+
+    /**
      * Set up.
      */
     public function setUp()
