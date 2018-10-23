@@ -47,6 +47,17 @@ class TwigConsoleDumpTest extends TestCase
     }
 
     /**
+     * Test that output is empty in non-debug mode.
+     */
+    public function testOutputIsEmptyInNonDebugMode()
+    {
+        $this->twigEnvironment->disableDebug();
+        $result = $this->twigEnvironment->render('test.twig', ['var' => 'Foo']);
+
+        self::assertSame('', $result);
+    }
+
+    /**
      * Set up.
      */
     public function setUp()
@@ -54,7 +65,7 @@ class TwigConsoleDumpTest extends TestCase
         $arrayLoader = new ArrayLoader([
             'test.twig' => '{{ dump(var) }}',
         ]);
-        $this->twigEnvironment = new Environment($arrayLoader);
+        $this->twigEnvironment = new Environment($arrayLoader, ['debug' => true]);
         $this->twigEnvironment->addExtension(new TwigConsoleDump());
     }
 

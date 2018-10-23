@@ -8,6 +8,7 @@ declare(strict_types=1);
 
 namespace MichaelHall\TwigConsoleDump;
 
+use Twig\Environment;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFunction;
 
@@ -30,7 +31,7 @@ class TwigConsoleDump extends AbstractExtension
     public function getFunctions(): array
     {
         return [
-            new TwigFunction('dump', [$this, 'dumpFunction'], ['is_safe' => ['html']]),
+            new TwigFunction('dump', [$this, 'dumpFunction'], ['is_safe' => ['html'], 'needs_environment' => true]),
         ];
     }
 
@@ -39,12 +40,17 @@ class TwigConsoleDump extends AbstractExtension
      *
      * @since 1.0.0
      *
-     * @param mixed $var The variable to dump.
+     * @param Environment $environment The Twig environment.
+     * @param mixed       $var         The variable to dump.
      *
      * @return string The result as a script printing to console.
      */
-    public function dumpFunction($var): string
+    public function dumpFunction(Environment $environment, $var): string
     {
+        if (!$environment->isDebug()) {
+            return '';
+        }
+
         return '<script>console.log(\'' . htmlentities(print_r($var, true)) . '\');</script>';
     }
 }
