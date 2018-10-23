@@ -67,6 +67,10 @@ class TwigConsoleDump extends AbstractExtension
             return 'console.log(\'%cnull\',\'color:#555;font-weight:400\');';
         }
 
+        if (is_bool($var)) {
+            return 'console.log(\'%c' . ($var ? 'true' : 'false') . ' %cbool\',\'color:#608;font-weight:600;\',\'color:#555;font-weight:400\');';
+        }
+
         return 'console.log(\'' . self::escapeString(print_r($var, true)) . '\');';
     }
 
