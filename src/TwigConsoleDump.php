@@ -51,7 +51,23 @@ class TwigConsoleDump extends AbstractExtension
             return '';
         }
 
-        return '<script>console.log(\'' . self::escapeString(print_r($var, true)) . '\');</script>';
+        return '<script>' . self::varToLogString($var) . '</script>';
+    }
+
+    /**
+     * Converts a variable into a log string.
+     *
+     * @param mixed $var The variable.
+     *
+     * @return string The log string.
+     */
+    private static function varToLogString($var): string
+    {
+        if (is_null($var)) {
+            return 'console.log(\'%cnull\',\'color:#555;font-weight:400\');';
+        }
+
+        return 'console.log(\'' . self::escapeString(print_r($var, true)) . '\');';
     }
 
     /**

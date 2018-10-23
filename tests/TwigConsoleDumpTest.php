@@ -37,7 +37,7 @@ class TwigConsoleDumpTest extends TestCase
     public function scalarsDataProvider()
     {
         return [
-            [null, '<script>console.log(\'\');</script>'],
+            [null, '<script>console.log(\'%cnull\',\'color:#555;font-weight:400\');</script>'],
             [false, '<script>console.log(\'\');</script>'],
             [true, '<script>console.log(\'1\');</script>'],
             [100, '<script>console.log(\'100\');</script>'],
