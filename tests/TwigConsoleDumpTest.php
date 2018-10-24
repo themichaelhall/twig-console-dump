@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MichaelHall\TwigConsoleDump\Tests;
 
+use MichaelHall\TwigConsoleDump\Tests\Helpers\BasicTestClass;
 use MichaelHall\TwigConsoleDump\TwigConsoleDump;
 use PHPUnit\Framework\TestCase;
 use Twig\Environment;
@@ -92,9 +93,33 @@ class TwigConsoleDumpTest extends TestCase
      */
     public function testObject()
     {
-        $result = $this->twigEnvironment->render('test.twig', ['var' => new \stdClass()]);
+        $result = $this->twigEnvironment->render('test.twig', ['var' => new BasicTestClass()]);
 
-        self::assertSame('<script>console.log(\'%cobject\',\'color:#555;font-weight:400\');</script>', $result);
+        self::assertSame(
+            '<script>' .
+            'console.groupCollapsed(\'%cMichaelHall\\\\TwigConsoleDump\\\\Tests\\\\Helpers\\\\BasicTestClass\',\'color:#555;font-weight:400\');' .
+            'console.log(\'%cpublicVar %c"Foo" %cstring[3]\',\'color:#00b;font-weight:400\',\'color:#063;font-weight:600\',\'color:#555;font-weight:400\');' .
+            'console.log(\'%cprotectedVar %cfalse %cbool\',\'color:#00b;font-weight:400\',\'color:#608;font-weight:600\',\'color:#555;font-weight:400\');' .
+            'console.log(\'%cprivateVar %c100.25 %cfloat\',\'color:#00b;font-weight:400\',\'color:#608;font-weight:600\',\'color:#555;font-weight:400\');' .
+            'console.log(\'%cpublicStaticVar %c42 %cint\',\'color:#00b;font-weight:400\',\'color:#608;font-weight:600\',\'color:#555;font-weight:400\');' .
+            'console.groupCollapsed(\'%cprotectedStaticVar %carray[2]\',\'color:#00b;font-weight:400\',\'color:#555;font-weight:400\');' .
+            'console.log(\'%c0 %c=> %c"Bar" %cstring[3]\',\'color:#608;font-weight:600\',\'color:#555;font-weight:400\',\'color:#063;font-weight:600\',\'color:#555;font-weight:400\');' .
+            'console.log(\'%c1 %c=> %c"Baz" %cstring[3]\',\'color:#608;font-weight:600\',\'color:#555;font-weight:400\',\'color:#063;font-weight:600\',\'color:#555;font-weight:400\');' .
+            'console.groupEnd();' .
+            'console.log(\'%cprivateStaticVar %cnull\',\'color:#00b;font-weight:400\',\'color:#555;font-weight:400\');' .
+            'console.groupEnd();' .
+            '</script>', $result
+        );
+    }
+
+    /**
+     * Test dump extension for a resource.
+     */
+    public function testResource()
+    {
+        $result = $this->twigEnvironment->render('test.twig', ['var' => opendir(sys_get_temp_dir())]);
+
+        self::assertSame('<script>console.log(\'%cresource\',\'color:#555;font-weight:400\');</script>', $result);
     }
 
     /**

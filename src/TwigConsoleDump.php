@@ -123,6 +123,25 @@ class TwigConsoleDump extends AbstractExtension
             return $result;
         }
 
+        // Object.
+        if (is_object($var)) {
+            $content[] = [self::escapeString(get_class($var)), self::STYLE_TYPE];
+            $result = self::toConsoleLog($content, true);
+
+            $reflectionClass = new \ReflectionClass($var);
+            foreach ($reflectionClass->getProperties() as $reflectionProperty) {
+                $reflectionProperty->setAccessible(true);
+                $propertyContent = [];
+
+                $propertyContent[] = [self::escapeString($reflectionProperty->getName()), self::STYLE_NAME];
+                $result .= self::varToLogString($reflectionProperty->getValue($var), $propertyContent);
+            }
+
+            $result .= 'console.groupEnd();';
+
+            return $result;
+        }
+
         // Other type.
         $content[] = [gettype($var), self::STYLE_TYPE];
 
@@ -185,4 +204,9 @@ class TwigConsoleDump extends AbstractExtension
      * Styles for arrow (e.g. =>).
      */
     private const STYLE_ARROW = 'color:#555;font-weight:400';
+
+    /**
+     * Styles for name (e.g. Model, myVar).
+     */
+    private const STYLE_NAME = 'color:#00b;font-weight:400';
 }
