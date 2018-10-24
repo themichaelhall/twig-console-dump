@@ -130,6 +130,22 @@ class TwigConsoleDumpTest extends TestCase
     }
 
     /**
+     * Test dump extenstion with a label.
+     */
+    public function testWithLabel()
+    {
+        $result = $this->twigEnvironment->render('test-label.twig', ['var' => ['Foo' => 'Bar']]);
+
+        self::assertSame(
+            '<script>' .
+            'console.groupCollapsed(\'%cLabel %carray[1]\',\'color:#00b;font-weight:400\',\'color:#555;font-weight:400\');' .
+            'console.log(\'%c"Foo" %c=> %c"Bar" %cstring[3]\',\'color:#063;font-weight:600\',\'color:#555;font-weight:400\',\'color:#063;font-weight:600\',\'color:#555;font-weight:400\');' .
+            'console.groupEnd();' .
+            '</script>', $result
+        );
+    }
+
+    /**
      * Test dump extension for a resource.
      */
     public function testResource()
@@ -145,7 +161,8 @@ class TwigConsoleDumpTest extends TestCase
     public function setUp()
     {
         $arrayLoader = new ArrayLoader([
-            'test.twig' => '{{ dump(var) }}',
+            'test.twig'       => '{{ dump(var) }}',
+            'test-label.twig' => '{{ dump(var, \'Label\') }}',
         ]);
         $this->twigEnvironment = new Environment($arrayLoader, ['debug' => true]);
         $this->twigEnvironment->addExtension(new TwigConsoleDump());

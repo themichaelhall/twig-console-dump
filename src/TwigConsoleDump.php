@@ -42,16 +42,22 @@ class TwigConsoleDump extends AbstractExtension
      *
      * @param Environment $environment The Twig environment.
      * @param mixed       $var         The variable to dump.
+     * @param string      $label       The label (optional).
      *
      * @return string The result as a script printing to console.
      */
-    public function dumpFunction(Environment $environment, $var): string
+    public function dumpFunction(Environment $environment, $var, $label = ''): string
     {
         if (!$environment->isDebug()) {
             return '';
         }
 
-        return '<script>' . self::varToLogString($var) . '</script>';
+        $content = [];
+        if ($label !== '') {
+            $content[] = [self::escapeString(strval($label)), self::STYLE_NAME];
+        }
+
+        return '<script>' . self::varToLogString($var, $content) . '</script>';
     }
 
     /**
