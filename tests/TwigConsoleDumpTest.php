@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MichaelHall\TwigConsoleDump\Tests;
 
 use MichaelHall\TwigConsoleDump\Tests\Helpers\BasicTestClass;
+use MichaelHall\TwigConsoleDump\Tests\Helpers\StringableTestClass;
 use MichaelHall\TwigConsoleDump\TwigConsoleDump;
 use PHPUnit\Framework\TestCase;
 use Twig\Environment;
@@ -107,6 +108,22 @@ class TwigConsoleDumpTest extends TestCase
             'console.log(\'%c1 %c=> %c"Baz" %cstring[3]\',\'color:#608;font-weight:600\',\'color:#555;font-weight:400\',\'color:#063;font-weight:600\',\'color:#555;font-weight:400\');' .
             'console.groupEnd();' .
             'console.log(\'%cprivateStaticVar %cnull\',\'color:#00b;font-weight:400\',\'color:#555;font-weight:400\');' .
+            'console.groupEnd();' .
+            '</script>', $result
+        );
+    }
+
+    /**
+     * Test dump extension for a object with a __toString method.
+     */
+    public function testStringableObject()
+    {
+        $result = $this->twigEnvironment->render('test.twig', ['var' => new StringableTestClass('Foo')]);
+
+        self::assertSame(
+            '<script>' .
+            'console.groupCollapsed(\'%c"Hello from Foo" %cMichaelHall\\\\TwigConsoleDump\\\\Tests\\\\Helpers\\\\StringableTestClass\',\'color:#063;font-weight:600\',\'color:#555;font-weight:400\');' .
+            'console.log(\'%clabel %c"Foo" %cstring[3]\',\'color:#00b;font-weight:400\',\'color:#063;font-weight:600\',\'color:#555;font-weight:400\');' .
             'console.groupEnd();' .
             '</script>', $result
         );

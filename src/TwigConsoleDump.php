@@ -125,6 +125,11 @@ class TwigConsoleDump extends AbstractExtension
 
         // Object.
         if (is_object($var)) {
+            $asString = self::objectToString($var);
+            if ($asString !== null) {
+                $content[] = ['"' . self::escapeString($asString) . '"', self::STYLE_STRING_VALUE];
+            }
+
             $content[] = [self::escapeString(get_class($var)), self::STYLE_TYPE];
             $result = self::toConsoleLog($content, true);
 
@@ -183,6 +188,22 @@ class TwigConsoleDump extends AbstractExtension
             ['\\\\', '\\<', '\\>', '\\\'', '\\n', '\\r', '%%'],
             $s
         );
+    }
+
+    /**
+     * Returns an object as a string or null if object could not be converted to a string.
+     *
+     * @param mixed $obj The object.
+     *
+     * @return null|string The object as a string or null.
+     */
+    private static function objectToString($obj): ?string
+    {
+        if (method_exists($obj, '__toString')) {
+            return $obj->__toString();
+        }
+
+        return null;
     }
 
     /**
