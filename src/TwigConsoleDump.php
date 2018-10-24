@@ -57,33 +57,97 @@ class TwigConsoleDump extends AbstractExtension
     /**
      * Converts a variable into a log string.
      *
-     * @param mixed $var The variable.
+     * @param mixed $var     The variable.
+     * @param array $content Optional content to insert before result.
      *
      * @return string The log string.
      */
-    private static function varToLogString($var): string
+    private static function varToLogString($var, $content = []): string
     {
+        // Null.
         if (is_null($var)) {
-            return 'console.log(\'%cnull\',\'color:#555;font-weight:400\');';
+            $content[] = ['null', self::STYLE_TYPE];
+
+            return self::toConsoleLog($content);
         }
 
+        // Bool.
         if (is_bool($var)) {
-            return 'console.log(\'%c' . ($var ? 'true' : 'false') . ' %cbool\',\'color:#608;font-weight:600;\',\'color:#555;font-weight:400\');';
+            $content[] = [$var ? 'true' : 'false', self::STYLE_VALUE];
+            $content[] = ['bool', self::STYLE_TYPE];
+
+            return self::toConsoleLog($content);
         }
 
+        // Int.
         if (is_int($var)) {
-            return 'console.log(\'%c' . $var . ' %cint\',\'color:#608;font-weight:600;\',\'color:#555;font-weight:400\');';
+            $content[] = [$var, self::STYLE_VALUE];
+            $content[] = ['int', self::STYLE_TYPE];
+
+            return self::toConsoleLog($content);
         }
 
+        // Float.
         if (is_float($var)) {
-            return 'console.log(\'%c' . $var . ' %cfloat\',\'color:#608;font-weight:600;\',\'color:#555;font-weight:400\');';
+            $content[] = [$var, self::STYLE_VALUE];
+            $content[] = ['float', self::STYLE_TYPE];
+
+            return self::toConsoleLog($content);
         }
 
+        // String.
         if (is_string($var)) {
-            return 'console.log(\'%c"' . self::escapeString($var) . '" %cstring[' . strlen($var) . ']\',\'color:#063;font-weight:600;\',\'color:#555;font-weight:400\');';
+            $content[] = ['"' . self::escapeString($var) . '"', self::STYLE_STRING_VALUE];
+            $content[] = ['string[' . strlen($var) . ']', self::STYLE_TYPE];
+
+            return self::toConsoleLog($content);
         }
 
-        return 'console.log(\'' . self::escapeString(print_r($var, true)) . '\');';
+        // Array.
+        if (is_array($var)) {
+            $content[] = ['array[' . count($var) . ']', self::STYLE_TYPE];
+            $result = self::toConsoleLog($content, true);
+            foreach ($var as $key => $value) {
+                $keyContent = [];
+                if (is_string($key)) {
+                    $keyContent[] = ['"' . self::escapeString($key) . '"', self::STYLE_STRING_VALUE];
+                } else {
+                    $keyContent[] = [$key, self::STYLE_VALUE];
+                }
+
+                $keyContent[] = ['=>', self::STYLE_ARROW];
+                $result .= self::varToLogString($value, $keyContent);
+            }
+            $result .= 'console.groupEnd();';
+
+            return $result;
+        }
+
+        // Other type.
+        $content[] = [gettype($var), self::STYLE_TYPE];
+
+        return self::toConsoleLog($content);
+    }
+
+    /**
+     * Creates a console log or group from log items.
+     *
+     * @param array $items   The log items.
+     * @param bool  $isGroup If true, create a group, if false, create a log.
+     *
+     * @return string The console log or group.
+     */
+    private static function toConsoleLog(array $items, bool $isGroup = false): string
+    {
+        $texts = [];
+        $styles = [];
+
+        foreach ($items as $item) {
+            $texts[] = '%c' . $item[0];
+            $styles[] = '\'' . $item[1] . '\'';
+        }
+
+        return 'console.' . ($isGroup ? 'groupCollapsed' : 'log') . '(\'' . implode(' ', $texts) . '\',' . implode(',', $styles) . ');';
     }
 
     /**
@@ -101,4 +165,24 @@ class TwigConsoleDump extends AbstractExtension
             $s
         );
     }
+
+    /**
+     * Styles for type (e.g. null, int, \Foo\Bar\Baz).
+     */
+    private const STYLE_TYPE = 'color:#555;font-weight:400';
+
+    /**
+     * Styles for ordinary values (e.g false, 42, 10.5).
+     */
+    private const STYLE_VALUE = 'color:#608;font-weight:600';
+
+    /**
+     * Style for strings (e.g. "Foo").
+     */
+    private const STYLE_STRING_VALUE = 'color:#063;font-weight:600';
+
+    /**
+     * Styles for arrow (e.g. =>).
+     */
+    private const STYLE_ARROW = 'color:#555;font-weight:400';
 }

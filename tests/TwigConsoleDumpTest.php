@@ -38,11 +38,11 @@ class TwigConsoleDumpTest extends TestCase
     {
         return [
             [null, '<script>console.log(\'%cnull\',\'color:#555;font-weight:400\');</script>'],
-            [false, '<script>console.log(\'%cfalse %cbool\',\'color:#608;font-weight:600;\',\'color:#555;font-weight:400\');</script>'],
-            [true, '<script>console.log(\'%ctrue %cbool\',\'color:#608;font-weight:600;\',\'color:#555;font-weight:400\');</script>'],
-            [100, '<script>console.log(\'%c100 %cint\',\'color:#608;font-weight:600;\',\'color:#555;font-weight:400\');</script>'],
-            [-0.5, '<script>console.log(\'%c-0.5 %cfloat\',\'color:#608;font-weight:600;\',\'color:#555;font-weight:400\');</script>'],
-            ['Foo Bar Baz', '<script>console.log(\'%c"Foo Bar Baz" %cstring[11]\',\'color:#063;font-weight:600;\',\'color:#555;font-weight:400\');</script>'],
+            [false, '<script>console.log(\'%cfalse %cbool\',\'color:#608;font-weight:600\',\'color:#555;font-weight:400\');</script>'],
+            [true, '<script>console.log(\'%ctrue %cbool\',\'color:#608;font-weight:600\',\'color:#555;font-weight:400\');</script>'],
+            [100, '<script>console.log(\'%c100 %cint\',\'color:#608;font-weight:600\',\'color:#555;font-weight:400\');</script>'],
+            [-0.5, '<script>console.log(\'%c-0.5 %cfloat\',\'color:#608;font-weight:600\',\'color:#555;font-weight:400\');</script>'],
+            ['Foo Bar Baz', '<script>console.log(\'%c"Foo Bar Baz" %cstring[11]\',\'color:#063;font-weight:600\',\'color:#555;font-weight:400\');</script>'],
         ];
     }
 
@@ -64,17 +64,37 @@ class TwigConsoleDumpTest extends TestCase
     {
         $result = $this->twigEnvironment->render('test.twig', ['var' => '<p> \'Foo\' "Bar" \\ New' . "\r\n" . 'Line %c']);
 
-        self::assertSame('<script>console.log(\'%c"\\<p\\> \\\'Foo\\\' "Bar" \\\\ New\\r\\nLine \\%c" %cstring[30]\',\'color:#063;font-weight:600;\',\'color:#555;font-weight:400\');</script>', $result);
+        self::assertSame('<script>console.log(\'%c"\\<p\\> \\\'Foo\\\' "Bar" \\\\ New\\r\\nLine \\%c" %cstring[30]\',\'color:#063;font-weight:600\',\'color:#555;font-weight:400\');</script>', $result);
     }
 
     /**
-     * Test dump extension for array.
+     * Test dump extension for an array.
      */
     public function testArray()
     {
-        $result = $this->twigEnvironment->render('test.twig', ['var' => ['Foo' => 'Bar', 2 => 'Baz']]);
+        $result = $this->twigEnvironment->render('test.twig', ['var' => ['Foo' => 'Bar', 1 => [2, 'Baz' => false]]]);
 
-        self::assertSame('<script>console.log(\'Array\\n(\\n    [Foo] =\\> Bar\\n    [2] =\\> Baz\\n)\\n\');</script>', $result);
+        self::assertSame(
+            '<script>' .
+            'console.groupCollapsed(\'%carray[2]\',\'color:#555;font-weight:400\');' .
+            'console.log(\'%c"Foo" %c=> %c"Bar" %cstring[3]\',\'color:#063;font-weight:600\',\'color:#555;font-weight:400\',\'color:#063;font-weight:600\',\'color:#555;font-weight:400\');' .
+            'console.groupCollapsed(\'%c1 %c=> %carray[2]\',\'color:#608;font-weight:600\',\'color:#555;font-weight:400\',\'color:#555;font-weight:400\');' .
+            'console.log(\'%c0 %c=> %c2 %cint\',\'color:#608;font-weight:600\',\'color:#555;font-weight:400\',\'color:#608;font-weight:600\',\'color:#555;font-weight:400\');' .
+            'console.log(\'%c"Baz" %c=> %cfalse %cbool\',\'color:#063;font-weight:600\',\'color:#555;font-weight:400\',\'color:#608;font-weight:600\',\'color:#555;font-weight:400\');' .
+            'console.groupEnd();' .
+            'console.groupEnd();' .
+            '</script>', $result
+        );
+    }
+
+    /**
+     * Test dump extension for an object.
+     */
+    public function testObject()
+    {
+        $result = $this->twigEnvironment->render('test.twig', ['var' => new \stdClass()]);
+
+        self::assertSame('<script>console.log(\'%cobject\',\'color:#555;font-weight:400\');</script>', $result);
     }
 
     /**
