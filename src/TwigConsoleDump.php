@@ -180,7 +180,7 @@ class TwigConsoleDump extends AbstractExtension
     {
         return str_replace(
             ['\\', '<', '>', '\'', "\n", "\r", '%'],
-            ['\\\\', '\\<', '\\>', '\\\'', '\\n', '\\r', '\\%'],
+            ['\\\\', '\\<', '\\>', '\\\'', '\\n', '\\r', '%%'],
             $s
         );
     }

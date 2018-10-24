@@ -65,7 +65,7 @@ class TwigConsoleDumpTest extends TestCase
     {
         $result = $this->twigEnvironment->render('test.twig', ['var' => '<p> \'Foo\' "Bar" \\ New' . "\r\n" . 'Line %c']);
 
-        self::assertSame('<script>console.log(\'%c"\\<p\\> \\\'Foo\\\' "Bar" \\\\ New\\r\\nLine \\%c" %cstring[30]\',\'color:#063;font-weight:600\',\'color:#555;font-weight:400\');</script>', $result);
+        self::assertSame('<script>console.log(\'%c"\\<p\\> \\\'Foo\\\' "Bar" \\\\ New\\r\\nLine %%c" %cstring[30]\',\'color:#063;font-weight:600\',\'color:#555;font-weight:400\');</script>', $result);
     }
 
     /**
