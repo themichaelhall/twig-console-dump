@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MichaelHall\TwigConsoleDump\Tests;
 
 use MichaelHall\TwigConsoleDump\Tests\Helpers\BasicTestClass;
+use MichaelHall\TwigConsoleDump\Tests\Helpers\DerivedTestClass;
 use MichaelHall\TwigConsoleDump\Tests\Helpers\StringableTestClass;
 use MichaelHall\TwigConsoleDump\TwigConsoleDump;
 use PHPUnit\Framework\TestCase;
@@ -17,7 +18,7 @@ use Twig\Loader\ArrayLoader;
 class TwigConsoleDumpTest extends TestCase
 {
     /**
-     * Test dump extension for scalars (and null).
+     * Test for scalars (and null).
      *
      * @dataProvider scalarsDataProvider
      *
@@ -49,7 +50,7 @@ class TwigConsoleDumpTest extends TestCase
     }
 
     /**
-     * Test that output is empty in non-debug mode.
+     * Test output is empty in non-debug mode.
      */
     public function testOutputIsEmptyInNonDebugMode()
     {
@@ -70,7 +71,7 @@ class TwigConsoleDumpTest extends TestCase
     }
 
     /**
-     * Test dump extension for an array.
+     * Test for an array.
      */
     public function testArray()
     {
@@ -90,7 +91,7 @@ class TwigConsoleDumpTest extends TestCase
     }
 
     /**
-     * Test dump extension for an object.
+     * Test for an object.
      */
     public function testObject()
     {
@@ -114,7 +115,7 @@ class TwigConsoleDumpTest extends TestCase
     }
 
     /**
-     * Test dump extension for a object with a __toString method.
+     * Test for a object with a __toString method.
      */
     public function testStringableObject()
     {
@@ -130,7 +131,7 @@ class TwigConsoleDumpTest extends TestCase
     }
 
     /**
-     * Test dump extenstion with a label.
+     * Test with a label.
      */
     public function testWithLabel()
     {
@@ -146,13 +147,35 @@ class TwigConsoleDumpTest extends TestCase
     }
 
     /**
-     * Test dump extension for a resource.
+     * Test for a resource.
      */
     public function testResource()
     {
         $result = $this->twigEnvironment->render('test.twig', ['var' => opendir(sys_get_temp_dir())]);
 
         self::assertSame('<script>console.log(\'%cresource\',\'color:#555;font-weight:400\');</script>', $result);
+    }
+
+    /**
+     * Test for derived class.
+     */
+    public function testDerived()
+    {
+        $result = $this->twigEnvironment->render('test.twig', ['var' => new DerivedTestClass()]);
+
+        self::assertSame(
+            '<script>' .
+            'console.groupCollapsed(\'%c"Bar" %cMichaelHall\\\\TwigConsoleDump\\\\Tests\\\\Helpers\\\\DerivedTestClass\',\'color:#063;font-weight:600\',\'color:#555;font-weight:400\');' .
+            'console.groupCollapsed(\'%cparent %cMichaelHall\\\\TwigConsoleDump\\\\Tests\\\\Helpers\\\\BaseTestClass\',\'color:#555;font-weight:400;font-style:italic\',\'color:#555;font-weight:400\');' .
+            'console.groupCollapsed(\'%cparent %cMichaelHall\\\\TwigConsoleDump\\\\Tests\\\\Helpers\\\\AbstractBaseTestClass\',\'color:#555;font-weight:400;font-style:italic\',\'color:#555;font-weight:400\');' .
+            'console.log(\'%cfoo %c"Foo" %cstring[3]\',\'color:#00b;font-weight:400\',\'color:#063;font-weight:600\',\'color:#555;font-weight:400\');' .
+            'console.groupEnd();' .
+            'console.log(\'%cbar %c"Bar" %cstring[3]\',\'color:#00b;font-weight:400\',\'color:#063;font-weight:600\',\'color:#555;font-weight:400\');' .
+            'console.groupEnd();' .
+            'console.log(\'%cbaz %c12345 %cint\',\'color:#00b;font-weight:400\',\'color:#608;font-weight:600\',\'color:#555;font-weight:400\');' .
+            'console.groupEnd();' .
+            '</script>', $result
+        );
     }
 
     /**

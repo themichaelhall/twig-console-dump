@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MichaelHall\TwigConsoleDump\Tests\Helpers;
 
 /**
- * A basic test class with variuos properties.
+ * A basic test class with various properties.
  */
 class BasicTestClass
 {

@@ -131,32 +131,66 @@ class TwigConsoleDump extends AbstractExtension
 
         // Object.
         if (is_object($var)) {
-            $asString = self::objectToString($var);
-            if ($asString !== null) {
-                $content[] = ['"' . self::escapeString($asString) . '"', self::STYLE_STRING_VALUE];
-            }
-
-            $content[] = [self::escapeString(get_class($var)), self::STYLE_TYPE];
-            $result = self::toConsoleLog($content, true);
-
             $reflectionClass = new \ReflectionClass($var);
-            foreach ($reflectionClass->getProperties() as $reflectionProperty) {
-                $reflectionProperty->setAccessible(true);
-                $propertyContent = [];
 
-                $propertyContent[] = [self::escapeString($reflectionProperty->getName()), self::STYLE_NAME];
-                $result .= self::varToLogString($reflectionProperty->getValue($var), $propertyContent);
-            }
-
-            $result .= 'console.groupEnd();';
-
-            return $result;
+            return self::objectToLogString($reflectionClass, $var, $content, true);
         }
 
         // Other type.
         $content[] = [gettype($var), self::STYLE_TYPE];
 
         return self::toConsoleLog($content);
+    }
+
+    /**
+     * Converts an object into log string.
+     *
+     * @param \ReflectionClass $reflectionClass   The reflection class of the object.
+     * @param mixed            $obj               The object.
+     * @param array            $content           Optional content to insert before result.
+     * @param bool             $showDisplayString If true, show a string representation of object.
+     *
+     * @return string The log string.
+     */
+    private static function objectToLogString(\ReflectionClass $reflectionClass, $obj, array $content, bool $showDisplayString): string
+    {
+        // String representation of object.
+        if ($showDisplayString) {
+            $asString = self::objectToString($obj);
+            if ($asString !== null) {
+                $content[] = ['"' . self::escapeString($asString) . '"', self::STYLE_STRING_VALUE];
+            }
+        }
+
+        // Class name header.
+        $content[] = [self::escapeString($reflectionClass->getName()), self::STYLE_TYPE];
+        $result = self::toConsoleLog($content, true);
+
+        // Parent class.
+        $parentClass = $reflectionClass->getParentClass();
+        if ($parentClass !== false) {
+            $parentClassContent = [];
+            $parentClassContent[] = ['parent', self::STYLE_NOTE];
+
+            $result .= self::objectToLogString($parentClass, $obj, $parentClassContent, false);
+        }
+
+        // Properties.
+        foreach ($reflectionClass->getProperties() as $reflectionProperty) {
+            if ($reflectionProperty->getDeclaringClass()->getName() !== $reflectionClass->getName()) {
+                continue;
+            }
+
+            $reflectionProperty->setAccessible(true);
+            $propertyContent = [];
+
+            $propertyContent[] = [self::escapeString($reflectionProperty->getName()), self::STYLE_NAME];
+            $result .= self::varToLogString($reflectionProperty->getValue($obj), $propertyContent);
+        }
+
+        $result .= 'console.groupEnd();';
+
+        return $result;
     }
 
     /**
@@ -236,4 +270,9 @@ class TwigConsoleDump extends AbstractExtension
      * Styles for name (e.g. Model, myVar).
      */
     private const STYLE_NAME = 'color:#00b;font-weight:400';
+
+    /**
+     * Styles for note (e.g. Base class).
+     */
+    private const STYLE_NOTE = 'color:#555;font-weight:400;font-style:italic';
 }
