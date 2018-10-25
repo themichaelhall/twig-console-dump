@@ -61,7 +61,7 @@ class TwigConsoleDump extends AbstractExtension
         $scriptNonce = strval($options['script-nonce'] ?? '');
         $result =
             '<script' . ($scriptNonce !== '' ? ' nonce="' . htmlentities($scriptNonce) . '"' : '') . '>' .
-            self::varToLogString($var, $content) .
+            self::varToLogString($var, $content, []) .
             '</script>';
 
         return $result;
@@ -70,12 +70,13 @@ class TwigConsoleDump extends AbstractExtension
     /**
      * Converts a variable into a log string.
      *
-     * @param mixed $var     The variable.
-     * @param array $content Optional content to insert before result.
+     * @param mixed   $var             The variable.
+     * @param array   $content         Optional content to insert before result.
+     * @param mixed[] $previousObjects The previous processed objects.
      *
      * @return string The log string.
      */
-    private static function varToLogString($var, $content = []): string
+    private static function varToLogString($var, $content, $previousObjects): string
     {
         // Null.
         if (is_null($var)) {
@@ -129,7 +130,7 @@ class TwigConsoleDump extends AbstractExtension
                 }
 
                 $keyContent[] = ['=>', self::STYLE_ARROW];
-                $result .= self::varToLogString($value, $keyContent);
+                $result .= self::varToLogString($value, $keyContent, $previousObjects);
             }
             $result .= 'console.groupEnd();';
 
@@ -140,7 +141,7 @@ class TwigConsoleDump extends AbstractExtension
         if (is_object($var)) {
             $reflectionClass = new \ReflectionClass($var);
 
-            return self::objectToLogString($reflectionClass, $var, $content, true);
+            return self::objectToLogString($reflectionClass, $var, $content, true, $previousObjects);
         }
 
         // Other type.
@@ -156,10 +157,11 @@ class TwigConsoleDump extends AbstractExtension
      * @param mixed            $obj               The object.
      * @param array            $content           Optional content to insert before result.
      * @param bool             $showDisplayString If true, show a string representation of object.
+     * @param mixed[]          $previousObjects   The previous processed objects.
      *
      * @return string The log string.
      */
-    private static function objectToLogString(\ReflectionClass $reflectionClass, $obj, array $content, bool $showDisplayString): string
+    private static function objectToLogString(\ReflectionClass $reflectionClass, $obj, array $content, bool $showDisplayString, array $previousObjects): string
     {
         // String representation of object.
         if ($showDisplayString) {
@@ -171,6 +173,17 @@ class TwigConsoleDump extends AbstractExtension
 
         // Class name header.
         $content[] = [self::escapeString($reflectionClass->getName()), self::STYLE_TYPE];
+
+        // Stuck in infinite recursion loop?
+        foreach ($previousObjects as $previousObject) {
+            if ($previousObject === $obj) {
+                $content[] = ['recursion', self::STYLE_NOTE];
+
+                return self::toConsoleLog($content);
+            }
+        }
+
+        // Class header.
         $result = self::toConsoleLog($content, true);
 
         // Parent class.
@@ -179,8 +192,11 @@ class TwigConsoleDump extends AbstractExtension
             $parentClassContent = [];
             $parentClassContent[] = ['parent', self::STYLE_NOTE];
 
-            $result .= self::objectToLogString($parentClass, $obj, $parentClassContent, false);
+            $result .= self::objectToLogString($parentClass, $obj, $parentClassContent, false, $previousObjects);
         }
+
+        // This object should not be processed again.
+        $previousObjects[] = $obj;
 
         // Properties.
         foreach ($reflectionClass->getProperties() as $reflectionProperty) {
@@ -192,7 +208,7 @@ class TwigConsoleDump extends AbstractExtension
             $propertyContent = [];
 
             $propertyContent[] = [self::escapeString($reflectionProperty->getName()), self::STYLE_NAME];
-            $result .= self::varToLogString($reflectionProperty->getValue($obj), $propertyContent);
+            $result .= self::varToLogString($reflectionProperty->getValue($obj), $propertyContent, $previousObjects);
         }
 
         $result .= 'console.groupEnd();';

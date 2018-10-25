@@ -6,6 +6,8 @@ namespace MichaelHall\TwigConsoleDump\Tests;
 
 use MichaelHall\TwigConsoleDump\Tests\Helpers\BasicTestClass;
 use MichaelHall\TwigConsoleDump\Tests\Helpers\DerivedTestClass;
+use MichaelHall\TwigConsoleDump\Tests\Helpers\Recursive1TestClass;
+use MichaelHall\TwigConsoleDump\Tests\Helpers\Recursive2TestClass;
 use MichaelHall\TwigConsoleDump\Tests\Helpers\StringableTestClass;
 use MichaelHall\TwigConsoleDump\TwigConsoleDump;
 use PHPUnit\Framework\TestCase;
@@ -189,6 +191,28 @@ class TwigConsoleDumpTest extends TestCase
             '<script nonce="abc">' .
             'console.groupCollapsed(\'%cLabel %carray[1]\',\'color:#00b;font-weight:400\',\'color:#555;font-weight:400\');' .
             'console.log(\'%c"Foo" %c=> %c"Bar" %cstring[3]\',\'color:#063;font-weight:600\',\'color:#555;font-weight:400\',\'color:#063;font-weight:600\',\'color:#555;font-weight:400\');' .
+            'console.groupEnd();' .
+            '</script>', $result
+        );
+    }
+
+    /**
+     * Test for a recursive object.
+     */
+    public function testRecursiveObject()
+    {
+        $recursive2 = new Recursive2TestClass();
+        $recursive1 = new Recursive1TestClass($recursive2);
+        $recursive2->recursive1 = $recursive1;
+
+        $result = $this->twigEnvironment->render('test.twig', ['var' => $recursive1]);
+
+        self::assertSame(
+            '<script>' .
+            'console.groupCollapsed(\'%cMichaelHall\\\\TwigConsoleDump\\\\Tests\\\\Helpers\\\\Recursive1TestClass\',\'color:#555;font-weight:400\');' .
+            'console.groupCollapsed(\'%crecursive2 %cMichaelHall\\\\TwigConsoleDump\\\\Tests\\\\Helpers\\\\Recursive2TestClass\',\'color:#00b;font-weight:400\',\'color:#555;font-weight:400\');' .
+            'console.log(\'%crecursive1 %cMichaelHall\\\TwigConsoleDump\\\Tests\\\\Helpers\\\\Recursive1TestClass %crecursion\',\'color:#00b;font-weight:400\',\'color:#555;font-weight:400\',\'color:#555;font-weight:400;font-style:italic\');' .
+            'console.groupEnd();' .
             'console.groupEnd();' .
             '</script>', $result
         );
