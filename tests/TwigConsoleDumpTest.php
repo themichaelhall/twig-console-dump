@@ -179,13 +179,30 @@ class TwigConsoleDumpTest extends TestCase
     }
 
     /**
+     * Test with script-nonce.
+     */
+    public function testWithScriptNonce()
+    {
+        $result = $this->twigEnvironment->render('test-script-nonce.twig', ['var' => ['Foo' => 'Bar']]);
+
+        self::assertSame(
+            '<script nonce="abc">' .
+            'console.groupCollapsed(\'%cLabel %carray[1]\',\'color:#00b;font-weight:400\',\'color:#555;font-weight:400\');' .
+            'console.log(\'%c"Foo" %c=> %c"Bar" %cstring[3]\',\'color:#063;font-weight:600\',\'color:#555;font-weight:400\',\'color:#063;font-weight:600\',\'color:#555;font-weight:400\');' .
+            'console.groupEnd();' .
+            '</script>', $result
+        );
+    }
+
+    /**
      * Set up.
      */
     public function setUp()
     {
         $arrayLoader = new ArrayLoader([
-            'test.twig'       => '{{ dump(var) }}',
-            'test-label.twig' => '{{ dump(var, \'Label\') }}',
+            'test.twig'              => '{{ dump(var) }}',
+            'test-label.twig'        => '{{ dump(var, \'Label\') }}',
+            'test-script-nonce.twig' => '{{ dump(var, \'Label\', {\'script-nonce\':\'abc\'}) }}',
         ]);
         $this->twigEnvironment = new Environment($arrayLoader, ['debug' => true]);
         $this->twigEnvironment->addExtension(new TwigConsoleDump());

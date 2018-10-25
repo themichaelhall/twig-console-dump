@@ -43,10 +43,11 @@ class TwigConsoleDump extends AbstractExtension
      * @param Environment $environment The Twig environment.
      * @param mixed       $var         The variable to dump.
      * @param string      $label       The label (optional).
+     * @param array       $options     The options (optional). Valid options are: 'script-nonce'.
      *
      * @return string The result as a script printing to console.
      */
-    public function dumpFunction(Environment $environment, $var, $label = ''): string
+    public function dumpFunction(Environment $environment, $var, $label = '', $options = []): string
     {
         if (!$environment->isDebug()) {
             return '';
@@ -57,7 +58,13 @@ class TwigConsoleDump extends AbstractExtension
             $content[] = [self::escapeString(strval($label)), self::STYLE_NAME];
         }
 
-        return '<script>' . self::varToLogString($var, $content) . '</script>';
+        $scriptNonce = strval($options['script-nonce'] ?? '');
+        $result =
+            '<script' . ($scriptNonce !== '' ? ' nonce="' . htmlentities($scriptNonce) . '"' : '') . '>' .
+            self::varToLogString($var, $content) .
+            '</script>';
+
+        return $result;
     }
 
     /**
