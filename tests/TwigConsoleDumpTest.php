@@ -219,6 +219,35 @@ class TwigConsoleDumpTest extends TestCase
     }
 
     /**
+     * Test with date classes (DateTime/DateTimeImmutable/DateInterval).
+     */
+    public function testDateClasses()
+    {
+        $result = $this->twigEnvironment->render('test.twig',
+            [
+                'var' => [
+                    new \DateTime('2000-01-02 03:04:05', new \DateTimeZone('+0200')),
+                    new \DateTimeImmutable('2006-07-08 09:10:11', new \DateTimeZone('-0400')),
+                    new \DateInterval('P1Y2M3DT4H5M6S'),
+                ],
+            ]
+        );
+
+        self::assertSame(
+            '<script>' .
+            'console.groupCollapsed(\'%carray[3]\',\'color:#555;font-weight:400\');' .
+            'console.groupCollapsed(\'%c0 %c=> %c"2000-01-02 03:04:05 +0200" %cDateTime\',\'color:#608;font-weight:600\',\'color:#555;font-weight:400\',\'color:#063;font-weight:600\',\'color:#555;font-weight:400\');' .
+            'console.groupEnd();' .
+            'console.groupCollapsed(\'%c1 %c=> %c"2006-07-08 09:10:11 -0400" %cDateTimeImmutable\',\'color:#608;font-weight:600\',\'color:#555;font-weight:400\',\'color:#063;font-weight:600\',\'color:#555;font-weight:400\');' .
+            'console.groupEnd();' .
+            'console.groupCollapsed(\'%c2 %c=> %c"1y 2m 3d 4h 5m 6s" %cDateInterval\',\'color:#608;font-weight:600\',\'color:#555;font-weight:400\',\'color:#063;font-weight:600\',\'color:#555;font-weight:400\');' .
+            'console.groupEnd();' .
+            'console.groupEnd();' .
+            '</script>', $result
+        );
+    }
+
+    /**
      * Set up.
      */
     public function setUp()

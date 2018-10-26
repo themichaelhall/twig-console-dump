@@ -266,6 +266,14 @@ class TwigConsoleDump extends AbstractExtension
             return $obj->__toString();
         }
 
+        if ($obj instanceof \DateTimeInterface) {
+            return $obj->format('Y-m-d H:i:s O');
+        }
+
+        if ($obj instanceof \DateInterval) {
+            return $obj->format('%yy %mm %dd %hh %im %ss');
+        }
+
         return null;
     }
 
