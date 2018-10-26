@@ -6,6 +6,7 @@ namespace MichaelHall\TwigConsoleDump\Tests;
 
 use MichaelHall\TwigConsoleDump\Tests\Helpers\BasicTestClass;
 use MichaelHall\TwigConsoleDump\Tests\Helpers\DerivedTestClass;
+use MichaelHall\TwigConsoleDump\Tests\Helpers\EmptyTestClass;
 use MichaelHall\TwigConsoleDump\Tests\Helpers\Recursive1TestClass;
 use MichaelHall\TwigConsoleDump\Tests\Helpers\Recursive2TestClass;
 use MichaelHall\TwigConsoleDump\Tests\Helpers\StringableTestClass;
@@ -236,12 +237,33 @@ class TwigConsoleDumpTest extends TestCase
         self::assertSame(
             '<script>' .
             'console.groupCollapsed(\'%carray[3]\',\'color:#555;font-weight:400\');' .
-            'console.groupCollapsed(\'%c0 %c=> %c"2000-01-02 03:04:05 +0200" %cDateTime\',\'color:#608;font-weight:600\',\'color:#555;font-weight:400\',\'color:#063;font-weight:600\',\'color:#555;font-weight:400\');' .
+            'console.log(\'%c0 %c=> %c"2000-01-02 03:04:05 +0200" %cDateTime\',\'color:#608;font-weight:600\',\'color:#555;font-weight:400\',\'color:#063;font-weight:600\',\'color:#555;font-weight:400\');' .
+            'console.log(\'%c1 %c=> %c"2006-07-08 09:10:11 -0400" %cDateTimeImmutable\',\'color:#608;font-weight:600\',\'color:#555;font-weight:400\',\'color:#063;font-weight:600\',\'color:#555;font-weight:400\');' .
+            'console.log(\'%c2 %c=> %c"1y 2m 3d 4h 5m 6s" %cDateInterval\',\'color:#608;font-weight:600\',\'color:#555;font-weight:400\',\'color:#063;font-weight:600\',\'color:#555;font-weight:400\');' .
             'console.groupEnd();' .
-            'console.groupCollapsed(\'%c1 %c=> %c"2006-07-08 09:10:11 -0400" %cDateTimeImmutable\',\'color:#608;font-weight:600\',\'color:#555;font-weight:400\',\'color:#063;font-weight:600\',\'color:#555;font-weight:400\');' .
-            'console.groupEnd();' .
-            'console.groupCollapsed(\'%c2 %c=> %c"1y 2m 3d 4h 5m 6s" %cDateInterval\',\'color:#608;font-weight:600\',\'color:#555;font-weight:400\',\'color:#063;font-weight:600\',\'color:#555;font-weight:400\');' .
-            'console.groupEnd();' .
+            '</script>', $result
+        );
+    }
+
+    /**
+     * Test with empty content.
+     */
+    public function testEmptyContent()
+    {
+        $result = $this->twigEnvironment->render('test.twig',
+            [
+                'var' => [
+                    [],
+                    new EmptyTestClass(),
+                ],
+            ]
+        );
+
+        self::assertSame(
+            '<script>' .
+            'console.groupCollapsed(\'%carray[2]\',\'color:#555;font-weight:400\');' .
+            'console.log(\'%c0 %c=> %carray[0]\',\'color:#608;font-weight:600\',\'color:#555;font-weight:400\',\'color:#555;font-weight:400\');' .
+            'console.log(\'%c1 %c=> %cMichaelHall\\\\TwigConsoleDump\\\\Tests\\\\Helpers\\\\EmptyTestClass\',\'color:#608;font-weight:600\',\'color:#555;font-weight:400\',\'color:#555;font-weight:400\');' .
             'console.groupEnd();' .
             '</script>', $result
         );

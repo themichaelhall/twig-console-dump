@@ -119,22 +119,7 @@ class TwigConsoleDump extends AbstractExtension
 
         // Array.
         if (is_array($var)) {
-            $content[] = ['array[' . count($var) . ']', self::STYLE_TYPE];
-            $result = self::toConsoleLog($content, true);
-            foreach ($var as $key => $value) {
-                $keyContent = [];
-                if (is_string($key)) {
-                    $keyContent[] = ['"' . self::escapeString($key) . '"', self::STYLE_STRING_VALUE];
-                } else {
-                    $keyContent[] = [$key, self::STYLE_VALUE];
-                }
-
-                $keyContent[] = ['=>', self::STYLE_ARROW];
-                $result .= self::varToLogString($value, $keyContent, $previousObjects);
-            }
-            $result .= 'console.groupEnd();';
-
-            return $result;
+            return self::arrayToLogString($var, $content, $previousObjects);
         }
 
         // Object.
@@ -148,6 +133,43 @@ class TwigConsoleDump extends AbstractExtension
         $content[] = [gettype($var), self::STYLE_TYPE];
 
         return self::toConsoleLog($content);
+    }
+
+    /**
+     * Converts an array into a log string.
+     *
+     * @param array   $arr             The array.
+     * @param array   $content         Optional content to insert before result.
+     * @param mixed[] $previousObjects The previous processed objects.
+     *
+     * @return string The log string.
+     */
+    private static function arrayToLogString(array $arr, array $content, array $previousObjects): string
+    {
+        $size = count($arr);
+
+        $content[] = ['array[' . $size . ']', self::STYLE_TYPE];
+
+        $result = self::toConsoleLog($content, $size > 0);
+        if ($size === 0) {
+            return $result;
+        }
+
+        foreach ($arr as $key => $value) {
+            $keyContent = [];
+            if (is_string($key)) {
+                $keyContent[] = ['"' . self::escapeString($key) . '"', self::STYLE_STRING_VALUE];
+            } else {
+                $keyContent[] = [$key, self::STYLE_VALUE];
+            }
+
+            $keyContent[] = ['=>', self::STYLE_ARROW];
+            $result .= self::varToLogString($value, $keyContent, $previousObjects);
+        }
+
+        $result .= 'console.groupEnd();';
+
+        return $result;
     }
 
     /**
@@ -183,11 +205,22 @@ class TwigConsoleDump extends AbstractExtension
             }
         }
 
+        // Does this object contain anything?
+        $parentClass = $reflectionClass->getParentClass();
+        /** @var \ReflectionProperty[] $reflectionProperties */
+        $reflectionProperties = array_filter($reflectionClass->getProperties(), function (\ReflectionProperty $rp) use ($reflectionClass) {
+            return $rp->getDeclaringClass()->getName() === $reflectionClass->getName();
+        });
+        $isEmpty = $parentClass === false && count($reflectionProperties) === 0;
+
         // Class header.
-        $result = self::toConsoleLog($content, true);
+        $result = self::toConsoleLog($content, !$isEmpty);
+
+        if ($isEmpty) {
+            return $result;
+        }
 
         // Parent class.
-        $parentClass = $reflectionClass->getParentClass();
         if ($parentClass !== false) {
             $parentClassContent = [];
             $parentClassContent[] = ['parent', self::STYLE_NOTE];
@@ -199,11 +232,7 @@ class TwigConsoleDump extends AbstractExtension
         $previousObjects[] = $obj;
 
         // Properties.
-        foreach ($reflectionClass->getProperties() as $reflectionProperty) {
-            if ($reflectionProperty->getDeclaringClass()->getName() !== $reflectionClass->getName()) {
-                continue;
-            }
-
+        foreach ($reflectionProperties as $reflectionProperty) {
             $reflectionProperty->setAccessible(true);
             $propertyContent = [];
 
