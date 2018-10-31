@@ -232,15 +232,42 @@ class TwigConsoleDump extends AbstractExtension
         $previousObjects[] = $obj;
 
         // Properties.
+        $result .= self::objectPropertiesToLogString($reflectionProperties, $obj, $previousObjects);
+        $result .= 'console.groupEnd();';
+
+        return $result;
+    }
+
+    /**
+     * Converts object properties into log string.
+     *
+     * @param \ReflectionProperty[] $reflectionProperties The reflection properties.
+     * @param mixed                 $obj                  The object.
+     * @param mixed[]               $previousObjects      The previous processed objects.
+     *
+     * @return string The log string.
+     */
+    private static function objectPropertiesToLogString(array $reflectionProperties, $obj, array $previousObjects): string
+    {
+        $result = '';
+
         foreach ($reflectionProperties as $reflectionProperty) {
             $reflectionProperty->setAccessible(true);
             $propertyContent = [];
 
+            $visibility = '';
+            if ($reflectionProperty->isPublic()) {
+                $visibility = 'public';
+            } elseif ($reflectionProperty->isProtected()) {
+                $visibility = 'protected';
+            } elseif ($reflectionProperty->isPrivate()) {
+                $visibility = 'private';
+            }
+
+            $propertyContent[] = [$visibility, self::STYLE_NOTE];
             $propertyContent[] = [self::escapeString($reflectionProperty->getName()), self::STYLE_NAME];
             $result .= self::varToLogString($reflectionProperty->getValue($obj), $propertyContent, $previousObjects);
         }
-
-        $result .= 'console.groupEnd();';
 
         return $result;
     }
