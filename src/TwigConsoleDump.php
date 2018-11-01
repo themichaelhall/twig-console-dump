@@ -222,17 +222,31 @@ class TwigConsoleDump extends AbstractExtension
 
         // Parent class.
         if ($parentClass !== false) {
-            $parentClassContent = [];
-            $parentClassContent[] = ['parent', self::STYLE_NOTE];
-
-            $result .= self::objectToLogString($parentClass, $obj, $parentClassContent, false, $previousObjects);
+            $result .= self::objectToLogString($parentClass, $obj, [['parent', self::STYLE_NOTE]], false, $previousObjects);
         }
 
         // This object should not be processed again.
         $previousObjects[] = $obj;
 
         // Properties.
-        $result .= self::objectPropertiesToLogString($reflectionProperties, $obj, $previousObjects);
+        $nonStaticProperties = [];
+        $staticProperties = [];
+        foreach ($reflectionProperties as $reflectionProperty) {
+            if ($reflectionProperty->isStatic()) {
+                $staticProperties[] = $reflectionProperty;
+            } else {
+                $nonStaticProperties[] = $reflectionProperty;
+            }
+        }
+
+        $result .= self::objectPropertiesToLogString($nonStaticProperties, $obj, $previousObjects);
+
+        if (count($staticProperties) !== 0) {
+            $result .= self::toConsoleLog([['static', self::STYLE_NOTE]], true);
+            $result .= self::objectPropertiesToLogString($staticProperties, $obj, $previousObjects);
+            $result .= 'console.groupEnd();';
+        }
+
         $result .= 'console.groupEnd();';
 
         return $result;
