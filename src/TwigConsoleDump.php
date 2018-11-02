@@ -111,7 +111,7 @@ class TwigConsoleDump extends AbstractExtension
 
         // String.
         if (is_string($var)) {
-            $content[] = ['"' . self::escapeString($var) . '"', self::STYLE_STRING_VALUE];
+            $content[] = [self::escapeAndQuoteString($var), self::STYLE_STRING_VALUE];
             $content[] = ['string[' . strlen($var) . ']', self::STYLE_TYPE];
 
             return self::toConsoleLog($content);
@@ -158,7 +158,7 @@ class TwigConsoleDump extends AbstractExtension
         foreach ($arr as $key => $value) {
             $keyContent = [];
             if (is_string($key)) {
-                $keyContent[] = ['"' . self::escapeString($key) . '"', self::STYLE_STRING_VALUE];
+                $keyContent[] = [self::escapeAndQuoteString($key), self::STYLE_STRING_VALUE];
             } else {
                 $keyContent[] = [$key, self::STYLE_VALUE];
             }
@@ -189,7 +189,7 @@ class TwigConsoleDump extends AbstractExtension
         if ($showDisplayString) {
             $asString = self::objectToString($obj);
             if ($asString !== null) {
-                $content[] = ['"' . self::escapeString($asString) . '"', self::STYLE_STRING_VALUE];
+                $content[] = [self::escapeAndQuoteString($asString), self::STYLE_STRING_VALUE];
             }
         }
 
@@ -308,22 +308,6 @@ class TwigConsoleDump extends AbstractExtension
     }
 
     /**
-     * Escapes a string for console logging.
-     *
-     * @param string $s The original string.
-     *
-     * @return string The escaped string.
-     */
-    private static function escapeString(string $s): string
-    {
-        return str_replace(
-            ['\\', '<', '>', '\'', "\n", "\r", '%'],
-            ['\\\\', '\\<', '\\>', '\\\'', '\\n', '\\r', '%%'],
-            $s
-        );
-    }
-
-    /**
      * Returns an object as a string or null if object could not be converted to a string.
      *
      * @param mixed $obj The object.
@@ -348,6 +332,34 @@ class TwigConsoleDump extends AbstractExtension
     }
 
     /**
+     * Escapes and quotes a string for console logging.
+     *
+     * @param string $s The original string.
+     *
+     * @return string The escaped and quoted string.
+     */
+    private static function escapeAndQuoteString(string $s): string
+    {
+        return '\\\'' . self::escapeString($s) . '\\\'';
+    }
+
+    /**
+     * Escapes a string for console logging.
+     *
+     * @param string $s The original string.
+     *
+     * @return string The escaped string.
+     */
+    private static function escapeString(string $s): string
+    {
+        return str_replace(
+            ['\\', '<', '>', '\'', "\n", "\r", '%'],
+            ['\\\\', '\\<', '\\>', '\\\'', '\\n', '\\r', '%%'],
+            $s
+        );
+    }
+
+    /**
      * Styles for type (e.g. null, int, \Foo\Bar\Baz).
      */
     private const STYLE_TYPE = 'color:#555;font-weight:400';
@@ -360,7 +372,7 @@ class TwigConsoleDump extends AbstractExtension
     /**
      * Style for strings (e.g. "Foo").
      */
-    private const STYLE_STRING_VALUE = 'color:#063;font-weight:600';
+    private const STYLE_STRING_VALUE = 'color:#900;font-weight:600';
 
     /**
      * Styles for arrow (e.g. =>).

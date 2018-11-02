@@ -48,7 +48,7 @@ class TwigConsoleDumpTest extends TestCase
             [true, '<script>console.log(\'%ctrue %cbool\',\'color:#608;font-weight:600\',\'color:#555;font-weight:400\');</script>'],
             [100, '<script>console.log(\'%c100 %cint\',\'color:#608;font-weight:600\',\'color:#555;font-weight:400\');</script>'],
             [-0.5, '<script>console.log(\'%c-0.5 %cfloat\',\'color:#608;font-weight:600\',\'color:#555;font-weight:400\');</script>'],
-            ['Foo Bar Baz', '<script>console.log(\'%c"Foo Bar Baz" %cstring[11]\',\'color:#063;font-weight:600\',\'color:#555;font-weight:400\');</script>'],
+            ['Foo Bar Baz', '<script>console.log(\'%c\\\'Foo Bar Baz\\\' %cstring[11]\',\'color:#900;font-weight:600\',\'color:#555;font-weight:400\');</script>'],
         ];
     }
 
@@ -70,7 +70,7 @@ class TwigConsoleDumpTest extends TestCase
     {
         $result = $this->twigEnvironment->render('test.twig', ['var' => '<p> \'Foo\' "Bar" \\ New' . "\r\n" . 'Line %c']);
 
-        self::assertSame('<script>console.log(\'%c"\\<p\\> \\\'Foo\\\' "Bar" \\\\ New\\r\\nLine %%c" %cstring[30]\',\'color:#063;font-weight:600\',\'color:#555;font-weight:400\');</script>', $result);
+        self::assertSame('<script>console.log(\'%c\\\'\\<p\\> \\\'Foo\\\' "Bar" \\\\ New\\r\\nLine %%c\\\' %cstring[30]\',\'color:#900;font-weight:600\',\'color:#555;font-weight:400\');</script>', $result);
     }
 
     /**
@@ -83,10 +83,10 @@ class TwigConsoleDumpTest extends TestCase
         self::assertSame(
             '<script>' .
             'console.groupCollapsed(\'%carray[2]\',\'color:#555;font-weight:400\');' .
-            'console.log(\'%c"Foo" %c=> %c"Bar" %cstring[3]\',\'color:#063;font-weight:600\',\'color:#555;font-weight:400\',\'color:#063;font-weight:600\',\'color:#555;font-weight:400\');' .
+            'console.log(\'%c\\\'Foo\\\' %c=> %c\\\'Bar\\\' %cstring[3]\',\'color:#900;font-weight:600\',\'color:#555;font-weight:400\',\'color:#900;font-weight:600\',\'color:#555;font-weight:400\');' .
             'console.groupCollapsed(\'%c1 %c=> %carray[2]\',\'color:#608;font-weight:600\',\'color:#555;font-weight:400\',\'color:#555;font-weight:400\');' .
             'console.log(\'%c0 %c=> %c2 %cint\',\'color:#608;font-weight:600\',\'color:#555;font-weight:400\',\'color:#608;font-weight:600\',\'color:#555;font-weight:400\');' .
-            'console.log(\'%c"Baz" %c=> %cfalse %cbool\',\'color:#063;font-weight:600\',\'color:#555;font-weight:400\',\'color:#608;font-weight:600\',\'color:#555;font-weight:400\');' .
+            'console.log(\'%c\\\'Baz\\\' %c=> %cfalse %cbool\',\'color:#900;font-weight:600\',\'color:#555;font-weight:400\',\'color:#608;font-weight:600\',\'color:#555;font-weight:400\');' .
             'console.groupEnd();' .
             'console.groupEnd();' .
             '</script>', $result
@@ -103,14 +103,14 @@ class TwigConsoleDumpTest extends TestCase
         self::assertSame(
             '<script>' .
             'console.groupCollapsed(\'%cMichaelHall\\\\TwigConsoleDump\\\\Tests\\\\Helpers\\\\BasicTestClass\',\'color:#555;font-weight:400\');' .
-            'console.log(\'%cpublic %cpublicVar %c"Foo" %cstring[3]\',\'color:#555;font-weight:400;font-style:italic\',\'color:#00b;font-weight:400\',\'color:#063;font-weight:600\',\'color:#555;font-weight:400\');' .
+            'console.log(\'%cpublic %cpublicVar %c\\\'Foo\\\' %cstring[3]\',\'color:#555;font-weight:400;font-style:italic\',\'color:#00b;font-weight:400\',\'color:#900;font-weight:600\',\'color:#555;font-weight:400\');' .
             'console.log(\'%cprotected %cprotectedVar %cfalse %cbool\',\'color:#555;font-weight:400;font-style:italic\',\'color:#00b;font-weight:400\',\'color:#608;font-weight:600\',\'color:#555;font-weight:400\');' .
             'console.log(\'%cprivate %cprivateVar %c100.25 %cfloat\',\'color:#555;font-weight:400;font-style:italic\',\'color:#00b;font-weight:400\',\'color:#608;font-weight:600\',\'color:#555;font-weight:400\');' .
             'console.groupCollapsed(\'%cstatic\',\'color:#555;font-weight:400;font-style:italic\');' .
             'console.log(\'%cpublic %cpublicStaticVar %c42 %cint\',\'color:#555;font-weight:400;font-style:italic\',\'color:#00b;font-weight:400\',\'color:#608;font-weight:600\',\'color:#555;font-weight:400\');' .
             'console.groupCollapsed(\'%cprotected %cprotectedStaticVar %carray[2]\',\'color:#555;font-weight:400;font-style:italic\',\'color:#00b;font-weight:400\',\'color:#555;font-weight:400\');' .
-            'console.log(\'%c0 %c=> %c"Bar" %cstring[3]\',\'color:#608;font-weight:600\',\'color:#555;font-weight:400\',\'color:#063;font-weight:600\',\'color:#555;font-weight:400\');' .
-            'console.log(\'%c1 %c=> %c"Baz" %cstring[3]\',\'color:#608;font-weight:600\',\'color:#555;font-weight:400\',\'color:#063;font-weight:600\',\'color:#555;font-weight:400\');' .
+            'console.log(\'%c0 %c=> %c\\\'Bar\\\' %cstring[3]\',\'color:#608;font-weight:600\',\'color:#555;font-weight:400\',\'color:#900;font-weight:600\',\'color:#555;font-weight:400\');' .
+            'console.log(\'%c1 %c=> %c\\\'Baz\\\' %cstring[3]\',\'color:#608;font-weight:600\',\'color:#555;font-weight:400\',\'color:#900;font-weight:600\',\'color:#555;font-weight:400\');' .
             'console.groupEnd();' .
             'console.log(\'%cprivate %cprivateStaticVar %cnull\',\'color:#555;font-weight:400;font-style:italic\',\'color:#00b;font-weight:400\',\'color:#555;font-weight:400\');' .
             'console.groupEnd();' .
@@ -128,8 +128,8 @@ class TwigConsoleDumpTest extends TestCase
 
         self::assertSame(
             '<script>' .
-            'console.groupCollapsed(\'%c"Hello from Foo" %cMichaelHall\\\\TwigConsoleDump\\\\Tests\\\\Helpers\\\\StringableTestClass\',\'color:#063;font-weight:600\',\'color:#555;font-weight:400\');' .
-            'console.log(\'%cprivate %clabel %c"Foo" %cstring[3]\',\'color:#555;font-weight:400;font-style:italic\',\'color:#00b;font-weight:400\',\'color:#063;font-weight:600\',\'color:#555;font-weight:400\');' .
+            'console.groupCollapsed(\'%c\\\'Hello from Foo\\\' %cMichaelHall\\\\TwigConsoleDump\\\\Tests\\\\Helpers\\\\StringableTestClass\',\'color:#900;font-weight:600\',\'color:#555;font-weight:400\');' .
+            'console.log(\'%cprivate %clabel %c\\\'Foo\\\' %cstring[3]\',\'color:#555;font-weight:400;font-style:italic\',\'color:#00b;font-weight:400\',\'color:#900;font-weight:600\',\'color:#555;font-weight:400\');' .
             'console.groupEnd();' .
             '</script>', $result
         );
@@ -145,7 +145,7 @@ class TwigConsoleDumpTest extends TestCase
         self::assertSame(
             '<script>' .
             'console.groupCollapsed(\'%cLabel %carray[1]\',\'color:#00b;font-weight:400\',\'color:#555;font-weight:400\');' .
-            'console.log(\'%c"Foo" %c=> %c"Bar" %cstring[3]\',\'color:#063;font-weight:600\',\'color:#555;font-weight:400\',\'color:#063;font-weight:600\',\'color:#555;font-weight:400\');' .
+            'console.log(\'%c\\\'Foo\\\' %c=> %c\\\'Bar\\\' %cstring[3]\',\'color:#900;font-weight:600\',\'color:#555;font-weight:400\',\'color:#900;font-weight:600\',\'color:#555;font-weight:400\');' .
             'console.groupEnd();' .
             '</script>', $result
         );
@@ -170,13 +170,13 @@ class TwigConsoleDumpTest extends TestCase
 
         self::assertSame(
             '<script>' .
-            'console.groupCollapsed(\'%c"Bar" %cMichaelHall\\\\TwigConsoleDump\\\\Tests\\\\Helpers\\\\DerivedTestClass\',\'color:#063;font-weight:600\',\'color:#555;font-weight:400\');' .
+            'console.groupCollapsed(\'%c\\\'Bar\\\' %cMichaelHall\\\\TwigConsoleDump\\\\Tests\\\\Helpers\\\\DerivedTestClass\',\'color:#900;font-weight:600\',\'color:#555;font-weight:400\');' .
             'console.groupCollapsed(\'%cparent %cMichaelHall\\\\TwigConsoleDump\\\\Tests\\\\Helpers\\\\BaseTestClass\',\'color:#555;font-weight:400;font-style:italic\',\'color:#555;font-weight:400\');' .
             'console.groupCollapsed(\'%cparent %cMichaelHall\\\\TwigConsoleDump\\\\Tests\\\\Helpers\\\\AbstractBaseTestClass\',\'color:#555;font-weight:400;font-style:italic\',\'color:#555;font-weight:400\');' .
-            'console.log(\'%cprivate %cfoo %c"Foo" %cstring[3]\',\'color:#555;font-weight:400;font-style:italic\',\'color:#00b;font-weight:400\',\'color:#063;font-weight:600\',\'color:#555;font-weight:400\');' .
+            'console.log(\'%cprivate %cfoo %c\\\'Foo\\\' %cstring[3]\',\'color:#555;font-weight:400;font-style:italic\',\'color:#00b;font-weight:400\',\'color:#900;font-weight:600\',\'color:#555;font-weight:400\');' .
             'console.groupEnd();' .
             'console.groupCollapsed(\'%cstatic\',\'color:#555;font-weight:400;font-style:italic\');' .
-            'console.log(\'%cprotected %cbar %c"Bar" %cstring[3]\',\'color:#555;font-weight:400;font-style:italic\',\'color:#00b;font-weight:400\',\'color:#063;font-weight:600\',\'color:#555;font-weight:400\');' .
+            'console.log(\'%cprotected %cbar %c\\\'Bar\\\' %cstring[3]\',\'color:#555;font-weight:400;font-style:italic\',\'color:#00b;font-weight:400\',\'color:#900;font-weight:600\',\'color:#555;font-weight:400\');' .
             'console.groupEnd();' .
             'console.groupEnd();' .
             'console.log(\'%cpublic %cbaz %c12345 %cint\',\'color:#555;font-weight:400;font-style:italic\',\'color:#00b;font-weight:400\',\'color:#608;font-weight:600\',\'color:#555;font-weight:400\');' .
@@ -195,7 +195,7 @@ class TwigConsoleDumpTest extends TestCase
         self::assertSame(
             '<script nonce="abc">' .
             'console.groupCollapsed(\'%cLabel %carray[1]\',\'color:#00b;font-weight:400\',\'color:#555;font-weight:400\');' .
-            'console.log(\'%c"Foo" %c=> %c"Bar" %cstring[3]\',\'color:#063;font-weight:600\',\'color:#555;font-weight:400\',\'color:#063;font-weight:600\',\'color:#555;font-weight:400\');' .
+            'console.log(\'%c\\\'Foo\\\' %c=> %c\\\'Bar\\\' %cstring[3]\',\'color:#900;font-weight:600\',\'color:#555;font-weight:400\',\'color:#900;font-weight:600\',\'color:#555;font-weight:400\');' .
             'console.groupEnd();' .
             '</script>', $result
         );
@@ -241,9 +241,9 @@ class TwigConsoleDumpTest extends TestCase
         self::assertSame(
             '<script>' .
             'console.groupCollapsed(\'%carray[3]\',\'color:#555;font-weight:400\');' .
-            'console.log(\'%c0 %c=> %c"2000-01-02 03:04:05 +0200" %cDateTime\',\'color:#608;font-weight:600\',\'color:#555;font-weight:400\',\'color:#063;font-weight:600\',\'color:#555;font-weight:400\');' .
-            'console.log(\'%c1 %c=> %c"2006-07-08 09:10:11 -0400" %cDateTimeImmutable\',\'color:#608;font-weight:600\',\'color:#555;font-weight:400\',\'color:#063;font-weight:600\',\'color:#555;font-weight:400\');' .
-            'console.log(\'%c2 %c=> %c"1y 2m 3d 4h 5m 6s" %cDateInterval\',\'color:#608;font-weight:600\',\'color:#555;font-weight:400\',\'color:#063;font-weight:600\',\'color:#555;font-weight:400\');' .
+            'console.log(\'%c0 %c=> %c\\\'2000-01-02 03:04:05 +0200\\\' %cDateTime\',\'color:#608;font-weight:600\',\'color:#555;font-weight:400\',\'color:#900;font-weight:600\',\'color:#555;font-weight:400\');' .
+            'console.log(\'%c1 %c=> %c\\\'2006-07-08 09:10:11 -0400\\\' %cDateTimeImmutable\',\'color:#608;font-weight:600\',\'color:#555;font-weight:400\',\'color:#900;font-weight:600\',\'color:#555;font-weight:400\');' .
+            'console.log(\'%c2 %c=> %c\\\'1y 2m 3d 4h 5m 6s\\\' %cDateInterval\',\'color:#608;font-weight:600\',\'color:#555;font-weight:400\',\'color:#900;font-weight:600\',\'color:#555;font-weight:400\');' .
             'console.groupEnd();' .
             '</script>', $result
         );
